@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Spring Boot Application
+  user-service:
+    build: .
+    ports:
+      - "6576:6576"
+    environment:
+      - SPRING_APPLICATION_NAME=User
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresdb:5432/bookuser  # Correct database URL
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=Akash@Sql
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      - postgresdb  # Ensures user-service starts after postgresdb
+    networks:
+      - backend
+
+  # PostgreSQL Database
+  postgresdb:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Akash@Sql
+      POSTGRES_DB: bookuser
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+networks:
+  backend:
+    driver: bridge
+
